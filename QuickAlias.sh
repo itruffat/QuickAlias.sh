@@ -111,10 +111,6 @@ function start_smart_aliases {
     touch "/tmp/lock_disable_aliases_for_now"
     load_array
     make_aliases
-    alias ad=add_alias
-    alias ap=path_alias
-    alias ar=remove_alias
-    alias al=print_aliases
     function echos_for_aliases_in_alias_management {
         echo "> ah: help with aliases (this)"
         echo "> ad: add alias [ format: <key>=<value>, example aone=a0 ]"
@@ -123,6 +119,10 @@ function start_smart_aliases {
         echo "> al: list aliases"
     }
     alias ah=echos_for_aliases_in_alias_management
+    alias ad=add_alias
+    alias ap=path_alias
+    alias ar=remove_alias
+    alias al=print_aliases
     rm "/tmp/lock_disable_aliases_for_now"
 
 }
