@@ -23,7 +23,7 @@ function remove_element {
     remove_call_type="$2"
 
     if [ "${aliases_array[$key]+exists}" ]; then : ; else
-        echo "The key '$key' does not exists"
+        echo "Warning: The key '$key' does not exists"
         return 1
     fi
 
