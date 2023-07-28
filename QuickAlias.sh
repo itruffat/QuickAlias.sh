@@ -1,7 +1,22 @@
 set -u
 declare -A aliases_array
 overwrite_protection=1
+unknown_terminal_skip=0
+SHELLNAME_4_ALIAS=${SHELLNAME_4_ALIAS:-unknown}
 
+if [[ "$SHELLNAME_4_ALIAS" == "bash" ]] ; then
+    function aliases_keys { echo "${!aliases_array[@]}" ; }
+elif [[ "$SHELLNAME_4_ALIAS" == "zsh" ]] ; then
+    function aliases_keys {
+        local tmp_alias
+	for tmp_alias in "${(@k)aliases_array}" ; do 
+	    echo "$tmp_alias" | sed 's/^"\(.*\)"$/\1/'
+	done
+	} 
+else
+    unknown_terminal_skip=1
+fi
+ 
 function add_element {
     local key value add_call_type
     key="${1%=*}"
@@ -13,7 +28,7 @@ function add_element {
         return 1
     fi
 
-    aliases_array["$key"]="$value"
+    aliases_array[$key]="$value"
     if [[ "$add_call_type" != "DRY" ]] ; then echo "$1" >> /etc/aliases_array_file.txt ; fi
 }
 
@@ -39,7 +54,7 @@ function remove_element {
 
 function make_aliases {
     local key
-    for key in "${!aliases_array[@]}"; do
+    for key in $( aliases_keys ) ; do
         if [ "$overwrite_protection" -eq 1 ] && ( type "$key" 1>/dev/null 2>&1 ) ; then
             echo "Warning: Tried to use alias '$key', but it's already defined and overwrite protection is on"
         else
@@ -52,7 +67,7 @@ function unmake_aliases {
     local key unmake_call_type
     unmake_call_type="$1"
 
-    for key in "${!aliases_array[@]}"; do
+    for key in $( aliases_keys ); do
         unalias "$key"
         if [[ "$unmake_call_type" == "EMPTY_ARRAY" ]] ; then remove_element "$key" "DRY" ; fi
     done
@@ -75,16 +90,11 @@ function reset_array {
 }
 
 function remove_alias {
-    if ( remove_element "$1" "SAVE" ) ; then
-        unalias "$1"
-    fi
-    reset_array
+    if ( remove_element "$1" "SAVE" ) ; then reset_array ; fi
 }
 
 function add_alias {
-    add_element "$1" "SAVE"
-    alias "$1"
-    reset_array
+    if ( add_element "$1" "SAVE" ) ; then reset_array ; fi
 }
 
 function path_alias {
@@ -96,7 +106,7 @@ function path_alias {
 
 function print_aliases {
     local key
-    for key in "${!aliases_array[@]}"; do echo "* $key -> ${aliases_array[$key]}" ; done
+    for key in $( aliases_keys ); do echo "* $key -> ${aliases_array[$key]}" ; done
 }
 
 function start_smart_aliases {
@@ -106,6 +116,12 @@ function start_smart_aliases {
         echo "Warning: File /tmp/lock_disable_aliases_for_now already exists. Skipping aliases."
         return 1
     fi
+
+    if [ "$unknown_terminal_skip" -eq 1 ] ; then
+	echo "Warning: Uknown terminal name.(\$SHELLNAME_4_ALIAS) Skipping aliases."
+        return 1
+    fi
+
 
     echo "Debug: Setting up aliases"
     touch "/tmp/lock_disable_aliases_for_now"
@@ -126,5 +142,3 @@ function start_smart_aliases {
     rm "/tmp/lock_disable_aliases_for_now"
 
 }
-
-start_smart_aliases
