@@ -112,7 +112,7 @@ function print_aliases {
 function unlock_aliases {
     if [ ! -f "/tmp/lock_disable_aliases_for_now" ]; then
         echo "Warning: Trying to remove locks, but no locks found."
-	exit 1
+	return 1
     fi
     echo "Debug: Removing locks."
     rm "/tmp/lock_disable_aliases_for_now"
