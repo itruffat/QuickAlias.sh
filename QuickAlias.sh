@@ -109,7 +109,33 @@ function print_aliases {
     for key in $( aliases_keys ); do echo "* $key -> ${aliases_array[$key]}" ; done
 }
 
+function unlock_aliases {
+    if [ ! -f "/tmp/lock_disable_aliases_for_now" ]; then
+        echo "Warning: Trying to remove locks, but no locks found."
+	exit 1
+    fi
+    echo "Debug: Removing locks."
+    rm "/tmp/lock_disable_aliases_for_now"
+}
+
 function start_smart_aliases {
+
+    echo "Debug: Setting up functional aliases"
+    # Main functions aliases
+    function echos_for_aliases_in_alias_management {
+        echo "> ah: help with aliases (this)"
+        echo "> ad: add alias [ format: <key>=<value>, example aone=a0 ]"
+        echo "> ap: add current path as alias"
+        echo "> ar: remove alias"
+        echo "> al: list aliases"
+	echo "> aua: remove locks (when alias failed)"
+    }
+    alias ah=echos_for_aliases_in_alias_management
+    alias ad=add_alias
+    alias ap=path_alias
+    alias ar=remove_alias
+    alias al=print_aliases
+    alias aua=unlock_aliases 
 
     # Lock is useful in case anything is improperly defined and code is added to ".bash_aliases"
     if [ -f "/tmp/lock_disable_aliases_for_now" ]; then
@@ -122,23 +148,11 @@ function start_smart_aliases {
         return 1
     fi
 
-
     echo "Debug: Setting up aliases"
     touch "/tmp/lock_disable_aliases_for_now"
     load_array
     make_aliases
-    function echos_for_aliases_in_alias_management {
-        echo "> ah: help with aliases (this)"
-        echo "> ad: add alias [ format: <key>=<value>, example aone=a0 ]"
-        echo "> ap: add current path as alias"
-        echo "> ar: remove alias"
-        echo "> al: list aliases"
-    }
-    alias ah=echos_for_aliases_in_alias_management
-    alias ad=add_alias
-    alias ap=path_alias
-    alias ar=remove_alias
-    alias al=print_aliases
+    
     rm "/tmp/lock_disable_aliases_for_now"
-
 }
+
