@@ -46,8 +46,8 @@ function remove_element {
     
     if [[ "$remove_call_type" != "DRY" ]] ; then
         # Necessary due to potential permissions issues
-        cp /etc/aliases_array_file.txt /tmp/cp_aaf_into_tmp.txt
-        sed -i "/^$key=/d" /tmp/cp_aaf_into_tmp.txt
+	# Replaced copy for cat due to MacOs incompatibility
+        cat /etc/aliases_array_file.txt | sed "/^$key=/d" > /tmp/cp_aaf_into_tmp.txt
         cp /tmp/cp_aaf_into_tmp.txt /etc/aliases_array_file.txt
     fi
 }
