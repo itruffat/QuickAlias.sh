@@ -19,9 +19,22 @@ fi
  
 function add_element {
     local key value add_call_type
-    key="${1%=*}"
-    value="${1#*=}"
+    
+    #key="${1%=*}"
+    key=$( echo "$1" | sed 's/\([^=]*\).*/\1/' )
+    #value="${1#*=}"
+    value=$( echo "$1" | sed 's/\'"${key}"'=\(.*\)/\1/' )
     add_call_type="$2"
+
+    if [ ${#key} -eq ${#1} ] ; then
+	    echo "Warning: Missing '=' sign in the provided parameters. ($1)"
+	return 1
+    fi
+
+    if [[ "$key" == "" ]] || [[ "$value" == "" ]] ; then
+        echo "Warning: Combination key=value (${key}=${value}) is not valid"
+	return 1
+    fi
 
     if [ "$overwrite_protection" -eq 1 ] && ( type "$key" 1>/dev/null 2>&1 ) ; then
         echo "Warning: Tried to add alias to '$key', but it's already defined and overwrite protection is on"
@@ -34,6 +47,7 @@ function add_element {
 
 function remove_element {
     local key remove_call_type
+    
     key="$1"
     remove_call_type="$2"
 
@@ -54,6 +68,7 @@ function remove_element {
 
 function make_aliases {
     local key
+    
     for key in $( aliases_keys ) ; do
         if [ "$overwrite_protection" -eq 1 ] && ( type "$key" 1>/dev/null 2>&1 ) ; then
             echo "Warning: Tried to use alias '$key', but it's already defined and overwrite protection is on"
@@ -65,6 +80,7 @@ function make_aliases {
 
 function unmake_aliases {
     local key unmake_call_type
+    
     unmake_call_type="$1"
 
     for key in $( aliases_keys ); do
@@ -90,22 +106,43 @@ function reset_array {
 }
 
 function remove_alias {
+
+    if  [ $# -eq 0 ] ; then 
+        echo "Warning: Parameters not provided for alias removal."
+	return 1   
+    fi
+
     if ( remove_element "$1" "SAVE" ) ; then reset_array ; fi
 }
 
 function add_alias {
+
+    if  [ $# -eq 0 ] ; then 
+        echo "Warning: Parameters not provided for alias addition."
+	return 1   
+    fi
+
     if ( add_element "$1" "SAVE" ) ; then reset_array ; fi
+
 }
 
 function path_alias {
     local key value
+    
+    if  [ $# -eq 0 ] ; then 
+        echo "Warning: Parameters not provided for directory alias definition (${PWD})."
+	return 1   
+    fi
+    
     key="$1"
     value="$PWD"
+    
     add_alias "$key"'=cd '"$value"
 }
 
 function print_aliases {
     local key
+    
     for key in $( aliases_keys ); do echo "* $key -> ${aliases_array[$key]}" ; done
 }
 
