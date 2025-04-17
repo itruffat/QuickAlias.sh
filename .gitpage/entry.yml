@@ -2,5 +2,6 @@ name: Quick-Alias
 category: utilities 
 skip: False
 description : |
-  Bash script that enables the quick creation and destruction of aliases on terminals. This corresponds with the nature of how I usually use aliases, needing to use them for a cuople of hours (maybe days) and then removing them.
-  Instead of needing to configure your terminal, the commands the script adds take care of that for you.
+  A lightweight Bash script for quickly creating and removing terminal aliases.
+  It matches how I typically use aliases—just for a few hours or days—so instead of editing shell configs manually, this script handles everything for you. 
+  No need to mess with your .bashrc or .zshrc; the aliases are temporary, easy to set up, and just as easy to tear down.
